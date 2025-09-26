@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Ad</title>
+</head>
+
+<body>
+    <p>Loading ad...</p>
+    {% if ad_type == 'ad1' %}
+    <script>
+        // open popunder and load script; onload notify server
+        var w = window.open('', '_blank');
+        var doc = w.document;
+        doc.open();
+        doc.write('<html><head><title>Ad</title></head><body>');
+        var s = doc.createElement('script');
+        s.type = 'text/javascript';
+        s.src = '//honorablegiven.com/24/3e/ee/243eee94c6a0fa1cf865b310d6ade1eb.js';
+        s.onload = function () {
+            // notify parent server
+            fetch('/confirm_view', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'ad_type=ad1' })
+                .then(function () { w.close(); window.location = '/dashboard'; });
+        };
+        doc.body.appendChild(s);
+        doc.write('</body></html>');
+        doc.close();
+    </script>
+    {% else %}
+    <script>
+        var w = window.open('', '_blank');
+        var doc = w.document;
+        doc.open();
+        doc.write('<html><head><title>Ad</title></head><body>');
+        var s = doc.createElement('script');
+        s.type = 'text/javascript';
+        s.src = '//honorablegiven.com/e4/06/54/e40654054912ec87321f8ae7b5b8475e.js';
+        s.onload = function () {
+            fetch('/confirm_view', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'ad_type=ad2' })
+                .then(function () { w.close(); window.location = '/dashboard'; });
+        };
+        doc.body.appendChild(s);
+        doc.write('</body></html>');
+        doc.close();
+    </script>
+    {% endif %}
+</body>
+
+</html>

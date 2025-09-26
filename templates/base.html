@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ad Rewards{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div class="social-bar">
+        <!-- Social Bar Ad -->
+        <script type='text/javascript' src='//honorablegiven.com/1c/28/ce/1c28cea4764a32c6ff51305841262340.js'></script>
+    </div>
+    <header>
+        <h2>Ad Rewards Platform</h2>
+        {% if session.get('user_id') %}
+        <a href="/dashboard">Dashboard</a> |
+        <a href="/referrals">Referrals</a> |
+        <a href="/logout">Logout</a>
+        {% else %}
+        <a href="/login">Login</a> |
+        <a href="/signup">Sign Up</a>
+        {% endif %}
+    </header>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <div class="banner-ad">
+        <!-- Banner Ad -->
+        <script async="async" data-cfasync="false"
+            src="//honorablegiven.com/07a0ea3dee3fc93775251a64a297df45/invoke.js"></script>
+        <div id="container-07a0ea3dee3fc93775251a64a297df45"></div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h3>Welcome</h3>
+<p>Balance: ${{ '{:.3f}'.format(user.balance) }}</p>
+<form method="post" action="/watch_ad">
+    <input type="hidden" name="ad_type" value="ad1">
+    <button type="submit">Watch Ad 1</button>
+</form>
+<form method="post" action="/watch_ad">
+    <input type="hidden" name="ad_type" value="ad2">
+    <button type="submit">Watch Ad 2</button>
+</form>
+<form method="post" action="/withdraw">
+    <input type="number" step="0.01" name="amount" placeholder="Amount (min $0.50)" required>
+    <button type="submit">Request Withdrawal</button>
+</form>
+<p>Daily counts: Ad1={{ counts.ad1 }} Ad2={{ counts.ad2 }} Total={{ counts.total }}</p>
+{% endblock %}

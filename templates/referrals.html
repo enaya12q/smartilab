@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Referrals{% endblock %}
+{% block content %}
+<h3>Your Referrals</h3>
+<div class="ref-link">{{ referral_link }}</div>
+<p>Joined via link: {{ referred_count }}</p>
+<p>Referral commission on withdraw: {{ commission_pct }}%</p>
+{% endblock %}
