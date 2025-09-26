@@ -2,3 +2,7 @@ Flask==2.2.5
 Flask-Mail==0.9.1
 gunicorn==20.1.0
 Werkzeug==2.2.3
+Flask-SQLAlchemy==3.0.3
+psycopg2-binary==2.9.7
+python-dotenv==1.0.0
+SQLAlchemy==1.4.47
