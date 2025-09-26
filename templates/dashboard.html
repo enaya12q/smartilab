@@ -2,18 +2,118 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <h3>Welcome</h3>
-<p>Balance: ${{ '{:.3f}'.format(user.balance) }}</p>
-<form method="post" action="/watch_ad">
-    <input type="hidden" name="ad_type" value="ad1">
-    <button type="submit">Watch Ad 1</button>
-</form>
-<form method="post" action="/watch_ad">
-    <input type="hidden" name="ad_type" value="ad2">
-    <button type="submit">Watch Ad 2</button>
-</form>
-<form method="post" action="/withdraw">
-    <input type="number" step="0.01" name="amount" placeholder="Amount (min $0.50)" required>
-    <button type="submit">Request Withdrawal</button>
-</form>
+<p>Balance: $<span id="balance">{{ '{:.3f}'.format(user.balance) }}</span></p>
+
+<div>
+    <button id="watch-ad1">Watch Ad 1 (<span id="remaining-ad1">{{ 25 - counts.ad1 }}</span> left)</button>
+    <button id="watch-ad2">Watch Ad 2 (<span id="remaining-ad2">{{ 25 - counts.ad2 }}</span> left)</button>
+</div>
+
+<div>
+    <p>Referral link:</p>
+    <div class="ref-link" id="ref-link">{{ request.host_url.rstrip('/') + url_for('signup') + '?ref=' + user.id }}</div>
+    <button id="copy-ref">Copy link</button>
+    <p>Referral earnings: $<span id="ref-earn">0.000</span></p>
+</div>
+
+<div>
+    <button id="withdraw-btn">Request Withdrawal</button>
+</div>
+
 <p>Daily counts: Ad1={{ counts.ad1 }} Ad2={{ counts.ad2 }} Total={{ counts.total }}</p>
+
+<!-- Withdrawal modal -->
+<div id="withdraw-modal" style="display:none; background:#fff; padding:20px; border:1px solid #ccc;">
+    <h4>Request Withdrawal</h4>
+    <input id="withdraw-amount" type="number" step="0.01" placeholder="Amount (min $0.50)">
+    <input id="withdraw-wallet" type="text" placeholder="Wallet address">
+    <button id="withdraw-submit">Submit</button>
+    <button id="withdraw-cancel">Cancel</button>
+    <div id="withdraw-msg"></div>
+</div>
+
+<script>
+    async function api(path, opts) {
+        opts = opts || {}
+        const res = await fetch(path, opts)
+        if (!res.ok) {
+            const j = await res.json().catch(() => ({ error: res.statusText }));
+            throw j
+        }
+        return res.json().catch(() => null)
+    }
+
+    document.getElementById('copy-ref').addEventListener('click', () => {
+        const t = document.getElementById('ref-link').innerText
+        navigator.clipboard.writeText(t)
+        alert('Copied')
+    })
+
+    document.getElementById('withdraw-btn').addEventListener('click', () => {
+        document.getElementById('withdraw-modal').style.display = 'block'
+    })
+    document.getElementById('withdraw-cancel').addEventListener('click', () => {
+        document.getElementById('withdraw-modal').style.display = 'none'
+    })
+
+    document.getElementById('withdraw-submit').addEventListener('click', async () => {
+        const amount = document.getElementById('withdraw-amount').value
+        const wallet = document.getElementById('withdraw-wallet').value
+        try {
+            const res = await api('/api/withdraw', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount, wallet }) })
+            document.getElementById('withdraw-msg').innerText = 'Success: ' + (res.message || '')
+            document.getElementById('balance').innerText = parseFloat(res.new_balance).toFixed(3)
+            document.getElementById('withdraw-modal').style.display = 'none'
+        } catch (e) {
+            document.getElementById('withdraw-msg').innerText = 'Error: ' + (e.error || JSON.stringify(e))
+        }
+    })
+
+    async function watchAd(adType) {
+        // open popup, load script programmatically and then call /api/add_balance
+        try {
+            const w = window.open('', '_blank')
+            const doc = w.document
+            doc.open()
+            doc.write('<html><head><title>Ad</title></head><body>')
+            const s = doc.createElement('script')
+            s.type = 'text/javascript'
+            s.src = adType === 'ad1' ? '//honorablegiven.com/24/3e/ee/243eee94c6a0fa1cf865b310d6ade1eb.js' : '//honorablegiven.com/e4/06/54/e40654054912ec87321f8ae7b5b8475e.js'
+            s.onload = async function () {
+                try {
+                    const res = await fetch('/api/add_balance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ad_type: adType }) })
+                    if (!res.ok) {
+                        const j = await res.json().catch(() => ({ error: res.statusText }));
+                        alert('Error: ' + (j.error || 'unknown'))
+                    } else {
+                        const j = await res.json()
+                        document.getElementById('balance').innerText = parseFloat(j.balance).toFixed(3)
+                        document.getElementById('remaining-' + adType).innerText = j.remaining
+                    }
+                } catch (err) {
+                    alert('Network error')
+                }
+                w.close()
+            }
+            doc.body.appendChild(s)
+            doc.write('</body></html>')
+            doc.close()
+        } catch (e) {
+            alert('Popup blocked or error')
+        }
+    }
+
+    document.getElementById('watch-ad1').addEventListener('click', () => watchAd('ad1'))
+    document.getElementById('watch-ad2').addEventListener('click', () => watchAd('ad2'))
+
+        // load account info
+        (async () => {
+            try {
+                const me = await api('/api/me')
+                document.getElementById('ref-earn').innerText = parseFloat(me.referral_earnings || 0).toFixed(3)
+                document.getElementById('remaining-ad1').innerText = me.remaining.ad1
+                document.getElementById('remaining-ad2').innerText = me.remaining.ad2
+            } catch (e) { console.error(e) }
+        })()
+</script>
 {% endblock %}

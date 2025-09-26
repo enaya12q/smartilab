@@ -2,7 +2,26 @@
 {% block title %}Referrals{% endblock %}
 {% block content %}
 <h3>Your Referrals</h3>
-<div class="ref-link">{{ referral_link }}</div>
-<p>Joined via link: {{ referred_count }}</p>
+<div>
+    <p>Your referral link</p>
+    <div class="ref-link" id="ref-link">{{ referral_link }}</div>
+    <button id="copy-ref">Copy link</button>
+</div>
+<p>Joined via link: <span id="referred-count">{{ referred_count }}</span></p>
+<p>Total referral earnings: $<span id="total-ref-earn">0.000</span></p>
 <p>Referral commission on withdraw: {{ commission_pct }}%</p>
+
+<script>
+    document.getElementById('copy-ref').addEventListener('click', () => { navigator.clipboard.writeText(document.getElementById('ref-link').innerText); alert('Copied'); })
+        (async () => {
+            try {
+                const res = await fetch('/api/me')
+                if (res.ok) {
+                    const j = await res.json()
+                    document.getElementById('total-ref-earn').innerText = parseFloat(j.referral_earnings || 0).toFixed(3)
+                    document.getElementById('referred-count').innerText = j.referred_count || 0
+                }
+            } catch (e) { console.error(e) }
+        })()
+</script>
 {% endblock %}
