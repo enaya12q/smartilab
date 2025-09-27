@@ -85,6 +85,19 @@ def create_tables():
     db.create_all()
 
 
+@app.route('/_health')
+def _health():
+    # simple health check for Vercel
+    return "ok", 200
+
+
+@app.errorhandler(500)
+def internal_error(e):
+    # Log the exception; on Vercel this appears in function logs
+    app.logger.exception('Internal server error: %s', e)
+    return render_template('base.html', message='Internal server error'), 500
+
+
 @app.route('/')
 def index():
     if session.get('user_id'):
