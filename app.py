@@ -1,5 +1,11 @@
 # load environment and setup
 import os
+import sys
+from datetime import datetime as _dt
+
+# Startup marker to make deployments easy to identify in Vercel logs
+print(f"APP_PY_LOADED {__name__} at {_dt.utcnow().isoformat()} (commit: 64ee9ff)" )
+sys.stdout.flush()
 import uuid
 from datetime import date, datetime
 from decimal import Decimal
