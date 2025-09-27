@@ -1,9 +1,3 @@
-def dashboard():
-def watch_ad():
-def open_ad():
-def confirm_view():
-def referrals():
-def withdraw():
 # load environment and setup
 import os
 import uuid
